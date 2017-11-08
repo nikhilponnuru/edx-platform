@@ -11,6 +11,8 @@ from django.core.files.storage import Storage
 from pkg_resources import resource_exists, resource_filename, resource_isdir, resource_listdir
 from xblock.core import XBlock
 
+from openedx.core.lib.xblock_utils import xblock_resource_pkg
+
 
 class XBlockPackageStorage(Storage):
     """
@@ -109,13 +111,30 @@ class XBlockPipelineFinder(BaseFinder):
     A static files finder that gets static assets from xblocks.
     """
     def __init__(self, *args, **kwargs):
+        """
+        XBlock class assets are ultimately accessed via pkg_resources. However,
+        if multiple XBlocks are installed by the same setup.py, they will share
+        the same resource files. Instead of writing out copies of those files
+        for every XBlock, we collapse them by top level package. So for instance,
+        "problem_builder.answer.AnswerBlock" and
+        "problem_builder.choice.ChoiceBlock" are both installed by the same
+        setup.py file and store their assets in a folder for "problem_builder".
+
+        However, XBlocks can change how they reference their resources, using a
+        different prefix. It's probably not a great idea to change this value
+        between XBlocks in the same install package, but it is possible, so we
+        iterate through all unique combinations of (package, prefix).
+        """
         super(XBlockPipelineFinder, self).__init__(*args, **kwargs)
-        xblock_classes = set()
-        for __, xblock_class in XBlock.load_classes():
-            xblock_classes.add(xblock_class)
+
+        # xblock_resource_info holds (package_name, resources_dir) tuples
+        xblock_resource_info = {
+            (xblock_resource_pkg(xblock_class), xblock_class.get_resources_dir())
+            for __, xblock_class in XBlock.load_classes()
+        }
         self.package_storages = [
-            XBlockPackageStorage(xblock_class.__module__, xblock_class.get_resources_dir())
-            for xblock_class in xblock_classes
+            XBlockPackageStorage(pkg_name, resources_dir)
+            for pkg_name, resources_dir in xblock_resource_info
         ]
 
     def list(self, ignore_patterns):
