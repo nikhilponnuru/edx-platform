@@ -23,11 +23,11 @@ class BaseI18nTestCase(TestCase):
     Base utilities for i18n test classes to derive from
     """
     preview_language_url = '/update_lang/'
-    url = reverse('dashboard')
     site_lang = settings.LANGUAGE_CODE
     pwd = 'test_password'
 
     def setUp(self):
+        self.url = reverse('dashboard')
         super(BaseI18nTestCase, self).setUp()
         self.addCleanup(translation.deactivate)
         self.client = Client()
@@ -171,7 +171,9 @@ class I18nLangPrefTests(BaseI18nTestCase):
         self.user_login()
 
     def set_lang_preference(self, language):
-        """Sets the user's language preference, allowing the LangPref middleware to operate to set the preference cookie."""
+        """
+        Sets the user's language preference, allowing the LangPref middleware to operate to set the preference cookie.
+        """
         response = self.client.patch(
             reverse('preferences_api', args=[self.user.username]),
             json.dumps({LANGUAGE_KEY: language}),

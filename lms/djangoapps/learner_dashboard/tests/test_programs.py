@@ -31,7 +31,6 @@ class TestProgramListing(ProgramsApiConfigMixin, SharedModuleStoreTestCase):
     """Unit tests for the program listing page."""
     maxDiff = None
     password = 'test'
-    url = reverse('program_listing_view')
 
     @classmethod
     def setUpClass(cls):
@@ -49,6 +48,7 @@ class TestProgramListing(ProgramsApiConfigMixin, SharedModuleStoreTestCase):
     def setUp(self):
         super(TestProgramListing, self).setUp()
 
+        self.url = reverse('program_listing_view')
         self.user = UserFactory()
         self.client.login(username=self.user.username, password=self.password)
 
@@ -176,7 +176,6 @@ class TestProgramDetails(ProgramsApiConfigMixin, CatalogIntegrationMixin, Shared
     """Unit tests for the program details page."""
     program_uuid = str(uuid4())
     password = 'test'
-    url = reverse('program_details_view', kwargs={'program_uuid': program_uuid})
 
     @classmethod
     def setUpClass(cls):
@@ -187,6 +186,7 @@ class TestProgramDetails(ProgramsApiConfigMixin, CatalogIntegrationMixin, Shared
         course = CourseFactory(course_runs=[course_run])
 
         cls.data = ProgramFactory(uuid=cls.program_uuid, courses=[course])
+        cls.url = reverse('program_details_view', kwargs={'program_uuid': cls.program_uuid})
 
     def setUp(self):
         super(TestProgramDetails, self).setUp()

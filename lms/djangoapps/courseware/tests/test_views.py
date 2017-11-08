@@ -983,7 +983,6 @@ class ViewsTestCase(ModuleStoreTestCase):
 class TestProgramMarketingView(SharedModuleStoreTestCase):
     """Unit tests for the program marketing page."""
     program_uuid = str(uuid4())
-    url = reverse('program_marketing_view', kwargs={'program_uuid': program_uuid})
 
     @classmethod
     def setUpClass(cls):
@@ -998,6 +997,7 @@ class TestProgramMarketingView(SharedModuleStoreTestCase):
             is_program_eligible_for_one_click_purchase=False,
             uuid=cls.program_uuid,
         )
+        cls.url = reverse('program_marketing_view', kwargs={'program_uuid': cls.program_uuid})
 
     def test_404_if_no_data(self, mock_cache):
         """

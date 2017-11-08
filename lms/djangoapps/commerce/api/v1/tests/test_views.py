@@ -83,7 +83,10 @@ class CourseApiViewTestMixin(object):
 
 class CourseListViewTests(CourseApiViewTestMixin, ModuleStoreTestCase):
     """ Tests for CourseListView. """
-    path = reverse('commerce_api:v1:courses:list')
+
+    def setUp(self):
+        super(CourseListViewTests, self).setUp()
+        self.path = reverse('commerce_api:v1:courses:list')
 
     def test_authentication_required(self):
         """ Verify only authenticated users can access the view. """
@@ -400,10 +403,10 @@ class OrderViewTests(UserMixin, TestCase):
     view_name = 'commerce_api:v1:orders:detail'
     ORDER_NUMBER = 'EDX-100001'
     MOCK_ORDER = {'number': ORDER_NUMBER}
-    path = reverse(view_name, kwargs={'number': ORDER_NUMBER})
 
     def setUp(self):
         super(OrderViewTests, self).setUp()
+        self.path = reverse(self.view_name, kwargs={'number': self.ORDER_NUMBER})
         self._login()
 
     def test_order_found(self):

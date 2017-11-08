@@ -285,10 +285,10 @@ class BasketOrderViewTests(UserMixin, TestCase):
     """ Tests for the basket order view. """
     view_name = 'commerce_api:v0:baskets:retrieve_order'
     MOCK_ORDER = {'number': 1}
-    path = reverse(view_name, kwargs={'basket_id': 1})
 
     def setUp(self):
         super(BasketOrderViewTests, self).setUp()
+        self.path = reverse(self.view_name, kwargs={'basket_id': 1})
         self._login()
 
     def test_order_found(self):
