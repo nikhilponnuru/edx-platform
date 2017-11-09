@@ -281,16 +281,11 @@ class RegistrationFormFactory(object):
         # a field on the registration form meant to hold the user's email address.
         email_placeholder = _(u"username@domain.com")
 
-        # Translators: These instructions appear on the registration form, immediately
-        # below a field meant to hold the user's email address.
-        email_instructions = _(u"This is what you will use to login.")
-
         form_desc.add_field(
             "email",
             field_type="email",
             label=email_label,
             placeholder=email_placeholder,
-            instructions=email_instructions,
             restrictions={
                 "min_length": accounts.EMAIL_MIN_LENGTH,
                 "max_length": accounts.EMAIL_MAX_LENGTH,
@@ -334,15 +329,10 @@ class RegistrationFormFactory(object):
         # a field on the registration form meant to hold the user's name.
         name_placeholder = _(u"Jane Q. Learner")
 
-        # Translators: These instructions appear on the registration form, immediately
-        # below a field meant to hold the user's full name.
-        name_instructions = _(u"This name will be used on any certificates that you earn.")
-
         form_desc.add_field(
             "name",
             label=name_label,
             placeholder=name_placeholder,
-            instructions=name_instructions,
             restrictions={
                 "max_length": accounts.NAME_MAX_LENGTH,
             },
@@ -360,13 +350,6 @@ class RegistrationFormFactory(object):
         # meant to hold the user's public username.
         username_label = _(u"Public Username")
 
-        username_instructions = _(
-            # Translators: These instructions appear on the registration form, immediately
-            # below a field meant to hold the user's public username.
-            u"The name that will identify you in your courses. "
-            u"It cannot be changed later."
-        )
-
         # Translators: This example username is used as a placeholder in
         # a field on the registration form meant to hold the user's username.
         username_placeholder = _(u"Jane_Q_Learner")
@@ -374,7 +357,6 @@ class RegistrationFormFactory(object):
         form_desc.add_field(
             "username",
             label=username_label,
-            instructions=username_instructions,
             placeholder=username_placeholder,
             restrictions={
                 "min_length": accounts.USERNAME_MIN_LENGTH,
@@ -711,12 +693,6 @@ class RegistrationFormFactory(object):
         # form used to select the country in which the user lives.
         country_label = _(u"Country or Region of Residence")
 
-        country_instructions = _(
-            # Translators: These instructions appear on the registration form, immediately
-            # below a field meant to hold the user's country.
-            u"The country or region where you live."
-        )
-
         error_msg = accounts.REQUIRED_FIELD_COUNTRY_MSG
 
         # If we set a country code, make sure it's uppercase for the sake of the form.
@@ -730,7 +706,6 @@ class RegistrationFormFactory(object):
         form_desc.add_field(
             "country",
             label=country_label,
-            instructions=country_instructions,
             field_type="select",
             options=list(countries),
             include_default_option=True,
@@ -751,7 +726,6 @@ class RegistrationFormFactory(object):
         if self._is_field_visible("terms_of_service"):
             terms_label = _(u"Honor Code")
             terms_link = marketing_link("HONOR")
-            terms_text = _(u"Review the Honor Code")
 
         # Combine terms of service and honor code checkboxes
         else:
@@ -759,14 +733,16 @@ class RegistrationFormFactory(object):
             # in order to register a new account.
             terms_label = _(u"Terms of Service and Honor Code")
             terms_link = marketing_link("HONOR")
-            terms_text = _(u"Review the Terms of Service and Honor Code")
 
         # Translators: "Terms of Service" is a legal document users must agree to
         # in order to register a new account.
-        label = _(u"I agree to the {platform_name} {terms_of_service}").format(
-            platform_name=configuration_helpers.get_value("PLATFORM_NAME", settings.PLATFORM_NAME),
-            terms_of_service=terms_label
-        )
+        label = _(u"I agree to the {platform_name} \
+                {terms_of_service_link_start}{terms_of_service}{terms_of_service_link_end}").format(
+                    platform_name=configuration_helpers.get_value("PLATFORM_NAME", settings.PLATFORM_NAME),
+                    terms_of_service=terms_label,
+                    terms_of_service_link_start="<a href='{terms_link}' target='_blank'>".format(terms_link=terms_link),
+                    terms_of_service_link_end="</a>",
+                )
 
         # Translators: "Terms of Service" is a legal document users must agree to
         # in order to register a new account.
@@ -784,8 +760,6 @@ class RegistrationFormFactory(object):
             error_messages={
                 "required": error_msg
             },
-            supplementalLink=terms_link,
-            supplementalText=terms_text
         )
 
     def _add_terms_of_service_field(self, form_desc, required=True):
