@@ -339,6 +339,10 @@ class BokChoyTestSuite(TestSuite):
                 "run",
             ]
             cmd.append("--rcfile={}".format(self.coveragerc))
+        else:
+            cmd += [
+                "python"
+            ]
         cmd += [
             "-m",
             "pytest",
