@@ -4,6 +4,7 @@ Useful django models for implementing XBlock infrastructure in django.
 import logging
 import warnings
 
+from django import VERSION
 from django.core.exceptions import ValidationError
 from django.db import models
 from opaque_keys.edx.keys import BlockTypeKey, CourseKey, UsageKey
@@ -35,14 +36,29 @@ class NoneToEmptyQuerySet(models.query.QuerySet):
     empty value.
     """
     def _filter_or_exclude(self, *args, **kwargs):
+        # TODO: Remove Django 1.11 upgrade shim
+        # SHIM: get_all_field_names / get_field_by_name have been replaced, this if/else should
+        # just be the else post-upgrade. These could be better consolidated, but I'm leaving
+        # it this way for easy cleanup.
+
         # pylint: disable=protected-access
-        for name in self.model._meta.get_all_field_names():
-            field_object, _model, direct, _m2m = self.model._meta.get_field_by_name(name)
-            if direct and hasattr(field_object, 'Empty'):
-                for suffix in ('', '_exact'):
-                    key = '{}{}'.format(name, suffix)
-                    if key in kwargs and kwargs[key] is None:
-                        kwargs[key] = field_object.Empty
+        if VERSION[0] == 1 and VERSION[1] < 10:
+            for name in self.model._meta.get_all_field_names():
+                field_object, _model, direct, _m2m = self.model._meta.get_field_by_name(name)
+                if direct and hasattr(field_object, 'Empty'):
+                    for suffix in ('', '_exact'):
+                        key = '{}{}'.format(name, suffix)
+                        if key in kwargs and kwargs[key] is None:
+                            kwargs[key] = field_object.Empty
+        else:
+            for field_object in self.model._meta.get_fields():
+                direct = not field_object.auto_created or field_object.concrete
+                if direct and hasattr(field_object, 'Empty'):
+                    for suffix in ('', '_exact'):
+                        key = '{}{}'.format(field_object.name, suffix)
+                        if key in kwargs and kwargs[key] is None:
+                            kwargs[key] = field_object.Empty
+
         return super(NoneToEmptyQuerySet, self)._filter_or_exclude(*args, **kwargs)
 
 

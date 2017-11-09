@@ -16,6 +16,7 @@ import itertools
 import logging
 
 from config_models.models import ConfigurationModel
+from django import VERSION
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
@@ -257,14 +258,18 @@ class XBlockFieldBase(models.Model):
     modified = models.DateTimeField(auto_now=True, db_index=True)
 
     def __unicode__(self):
-        return u'{}<{!r}'.format(
-            self.__class__.__name__,
-            {
-                key: getattr(self, key)
-                for key in self._meta.get_all_field_names()
-                if key not in ('created', 'modified')
-            }
-        )
+        # TODO: Remove Django 1.11 upgrade shim
+        # SHIM: get_all_field_names / get_field_by_name have been replaced, this if/else should
+        # just be the else post-upgrade
+        ignored_field_names = ('created', 'modified')
+
+        # pylint: disable=protected-access
+        if VERSION[0] == 1 and VERSION[1] < 10:
+            keys = [field for field in self._meta.get_all_field_names() if field not in ignored_field_names]
+        else:
+            keys = [field.name for field in self._meta.get_fields() if field.name not in ignored_field_names]
+
+        return u'{}<{!r}'.format(self.__class__.__name__, {key: getattr(self, key) for key in keys})
 
 
 class XModuleUserStateSummaryField(XBlockFieldBase):

@@ -3,7 +3,7 @@
 Admin site configuration for third party authentication
 """
 from config_models.admin import ConfigurationModelAdmin, KeyedConfigurationModelAdmin
-from django import forms
+from django import forms, VERSION
 from django.contrib import admin
 
 from third_party_auth.provider import Registry
@@ -116,8 +116,17 @@ class SAMLProviderDataAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:  # editing an existing object
-            return self.model._meta.get_all_field_names()  # pylint: disable=protected-access
+            # TODO: Remove Django 1.11 upgrade shim
+            # SHIM: get_all_field_names / get_field_by_name have been replaced, this if/else should
+            # just be the else post-upgrade
+
+            # pylint: disable=protected-access
+            if VERSION[0] == 1 and VERSION[1] < 10:
+                return self.model._meta.get_all_field_names()
+            else:
+                return [field.name for field in self.model._meta.get_fields()]
         return self.readonly_fields
+
 
 admin.site.register(SAMLProviderData, SAMLProviderDataAdmin)
 
