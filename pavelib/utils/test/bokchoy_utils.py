@@ -45,7 +45,7 @@ def start_servers(options):
         # if coveragerc:
         #     cmd += "coverage run --rcfile={coveragerc} -m "
         # else:
-            cmd += "python -m "
+        cmd += "python -m "
         cmd += (
             "manage {service} --settings {settings} runserver "
             "{address} --traceback --noreload".format(
