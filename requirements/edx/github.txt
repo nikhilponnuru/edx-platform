@@ -110,3 +110,4 @@ git+https://github.com/edx-solutions/xblock-drag-and-drop-v2@v2.0.18#egg=xblock-
 # TODO: Deploy xblock-review to PyPI and pin it before going to master. Talk to Feanil if any questions
 # For the purpose of being able to build during this PR time, I'm setting the branch to PR. Will switch to PyPI later
 -e git+https://github.com/Dillon-Dumesnil/xblock-review@PR#egg=xblock-review
+
